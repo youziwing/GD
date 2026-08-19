@@ -1,0 +1,55 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local lp = Players.LocalPlayer
+
+local running = true
+local TINY = Vector3.new(0.001, 0.001, 0.001)
+local BOXES = {"TrafficCollisionFront", "TrafficCollisionRear", "TrafficCollisionLeft", "TrafficCollisionRight"}
+
+local function getCar()
+    local prefix = lp.Name .. "_"
+    for _, c in ipairs(Workspace:GetChildren()) do
+        if c.ClassName == "Model" and c.Name:sub(1, #prefix) == prefix then
+            return c
+        end
+    end
+    return nil
+end
+
+task.spawn(function()
+    while running do
+        local car = getCar()
+        if car then
+            local body = car:FindFirstChild("Body")
+            if body then
+                for i = 1, #BOXES do
+                    local p = body:FindFirstChild(BOXES[i])
+                    if p then p.Size = TINY end
+                end
+            end
+        end
+        task.wait(0.25)
+    end
+end)
+
+task.spawn(function()
+    while running do
+        local tf = Workspace:FindFirstChild("TrafficFolder")
+        if tf then
+            for _, p in ipairs(tf:GetDescendants()) do
+                local cn = p.ClassName
+                if cn == "Part" or cn == "MeshPart" or cn == "WedgePart" then
+                    if p.CanCollide then
+                        p.CanCollide = false
+                    end
+                    if p.Name == "CoreHitbox" and p.Size.X > 0.01 then
+                        p.Size = TINY
+                    end
+                end
+            end
+        end
+        task.wait(0.25)
+    end
+end)
+
+print("slayyy")
